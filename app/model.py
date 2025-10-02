@@ -153,6 +153,7 @@ class DetectionModel:
 
         detections = self._postrocess(outputs[0])
         detections = apply_nms(detections)
+        # draw_detections(image, detections)
         result = {str(item['label']): float(item['score']) for item in detections}
         result = id2partname(result)
         return result

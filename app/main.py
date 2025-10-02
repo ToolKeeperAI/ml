@@ -16,7 +16,7 @@ model = DetectionModel(
 app = FastAPI(title="FasterRCNN API")
 
 @app.post("/predict")
-async def predict(file: UploadFile = File(...), show_image: bool=False):
+async def predict(file: UploadFile = File(...)):
     """
     Предсказание на одном изображении
     
@@ -24,8 +24,6 @@ async def predict(file: UploadFile = File(...), show_image: bool=False):
     """
     image = load_image(await file.read())
     detections = model.predict(image)
-    if show_image:
-        draw_detections(image, detections)
     return {"detections": detections}
 
 @app.post("/predict_batch")
