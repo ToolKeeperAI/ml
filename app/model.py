@@ -187,10 +187,15 @@ class DetectionModel:
             for output in outputs:
                 detection = self._postrocess(output)
                 detections.append(cross_class_nms(detection))
+            # print(detections)
+            for detection in detections:
+                draw_detections(images[i], detection, output_path=f"output_{i}.jpg")
+                result = {str(item['label']): float(item['score']) for item in detection}
+                print(result)
+                result = id2partname(result)
+                print(result)
 
-            result = {item['label']: item['score'] for item in detections}
-            result = id2partname(result)
-            results[i] = result
+                results[len(results)] = result
         return results
 
             
