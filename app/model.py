@@ -6,6 +6,7 @@ import albumentations as A
 from albumentations.pytorch import ToTensorV2
 from torchvision.ops import nms, box_iou
 
+from app.utils import draw_detections
 from typing import List, Dict, Union
 
 def apply_nms(detections: List[Dict[str, Union[List[int], float]]], iou_threshold=0.5)->List[Dict[str, Union[List[int], float]]]:
@@ -53,7 +54,7 @@ def id2partname(results: Dict[str, float]):
     mapped_results = {value: results.get(key, 0) for key, value in id2name.items()}
     return mapped_results
 
-def cross_class_nms(detections: List[Dict[str, Union[List[int], float]]], iou_threshold: float=0.3):
+def cross_class_nms(detections: List[Dict[str, Union[List[int], float]]], iou_threshold: float=0.1):
     """
     detections: список словарей {"bbox": [...], "label": int, "score": float}
     iou_threshold: float, порог IoU для подавления между всеми классами
@@ -78,7 +79,7 @@ def cross_class_nms(detections: List[Dict[str, Union[List[int], float]]], iou_th
             if not keep[sorted_indices[j]]:
                 continue
             box_j = boxes[sorted_indices[j]].unsqueeze(0)
-            iou = box_iou(box_i, box_j)[0,0].item()
+            iou = box_iou(box_i, box_j)[0, 0].item()
             if iou > iou_threshold:
                 keep[sorted_indices[j]] = False  # оставляем только более высокий score
 
@@ -149,11 +150,14 @@ class DetectionModel:
         out_transform = self.transform(image=image)
         img_tensor = out_transform["image"].unsqueeze(0).to(self.device)
         with torch.no_grad():
+            from time import time
+            s = time()
             outputs = self.model(img_tensor)
+            print(f"⏱ Время инференса: {time()-s:.3f} сек")
 
         detections = self._postrocess(outputs[0])
         detections = apply_nms(detections)
-        # draw_detections(image, detections)
+        draw_detections(image, detections)
         result = {str(item['label']): float(item['score']) for item in detections}
         result = id2partname(result)
         return result

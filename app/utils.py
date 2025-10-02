@@ -17,12 +17,26 @@ def draw_detections(image: Image.Image, detections: List[Dict[str, Union[List[in
       {"bbox": [x_min, y_min, x_max, y_max], "label": "dog", "score": 0.81}
     ]
     """
+    CLASS_COLORS = {
+        0: "red",
+        1: "green",
+        2: "blue",
+        3: "orange",
+        4: "purple",
+        5: "cyan",
+        6: "magenta",
+        7: "yellow",
+        8: "brown",
+        9: "pink",
+        10: "lime"
+    }
+
     image = Image.fromarray(image)
     draw = ImageDraw.Draw(image)
-    
-    # Если есть шрифт, можно подключить его, иначе используем PIL-шрифт
+
+    # Подключаем шрифт
     try:
-        font = ImageFont.truetype("/System/Library/Fonts/Supplemental/Arial.ttf", 50)
+        font = ImageFont.truetype("/System/Library/Fonts/Supplemental/Arial.ttf", 100)
     except:
         print("⚠️ Шрифт arial.ttf не найден, используем шрифт по умолчанию.")
         font = ImageFont.load_default()
@@ -33,10 +47,11 @@ def draw_detections(image: Image.Image, detections: List[Dict[str, Union[List[in
         score = detection.get("score", 0.0)
 
         x1, y1, x2, y2 = map(int, bbox)
-        draw.rectangle([x1, y1, x2, y2], outline="green", width=2)
-        text = f"{label}: {score:.2f}"
-        draw.text((x1, y1 - 10), text, fill="red", font=font)
+        color = CLASS_COLORS.get(label, "white")  # Цвет по классу, белый по умолчанию
 
+        draw.rectangle([x1, y1, x2, y2], outline=color, width=5)
+        text = f"{label}: {score:.2f}"
+        draw.text((x1, y1 - 100), text, fill=color, font=font)
     image.save(output_path)
     print(f"✅ Изображение сохранено: {output_path}")
 
