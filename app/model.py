@@ -35,6 +35,24 @@ def apply_nms(detections: List[Dict[str, Union[List[int], float]]], iou_threshol
 
     return nms_detections
 
+def id2partname(results: Dict[str, float]):
+
+    id2name = {
+        "1": "466223255",
+        "2": "48301002",
+        "3": "4636",
+        "4": "453",
+        "5": "65751280",
+        "6": "65015160",
+        "7": "1048_250",
+        "8": "4025_8",
+        "9": "CANKEY01",
+        "10": "open_box_13",
+        "11": "66005160",
+    }
+    mapped_results = {value: results.get(key, 0) for key, value in id2name.items()}
+    return mapped_results
+
 def cross_class_nms(detections: List[Dict[str, Union[List[int], float]]], iou_threshold: float=0.3):
     """
     detections: список словарей {"bbox": [...], "label": int, "score": float}
@@ -133,8 +151,11 @@ class DetectionModel:
         with torch.no_grad():
             outputs = self.model(img_tensor)
 
-        result = self._postrocess(outputs[0])
-        return cross_class_nms(result)
+        detections = self._postrocess(outputs[0])
+        detections = apply_nms(detections)
+        result = {str(item['label']): float(item['score']) for item in detections}
+        result = id2partname(result)
+        return result
 
     def predict_batch(self, images: List[Image.Image]):
         """
@@ -151,16 +172,20 @@ class DetectionModel:
             img_tensors.append(img_tensor)
 
 
-        results = []
+        detections = []
+        results = {}
         # Обрабатываем батчами
         for i in range(0, len(img_tensors), self.batch_size):
             batch = img_tensors[i:i+self.batch_size]
             with torch.no_grad():
                 outputs = self.model(batch)  # FasterRCNN принимает list of tensors
             for output in outputs:
-                result = self._postrocess(output)
-                results.append(cross_class_nms(result))
+                detection = self._postrocess(output)
+                detections.append(cross_class_nms(detection))
 
+            result = {item['label']: item['score'] for item in detections}
+            result = id2partname(result)
+            results[i] = result
         return results
 
             
