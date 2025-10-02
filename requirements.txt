@@ -1,0 +1,8 @@
+albumentations
+torch
+torchvision
+fastapi
+uvicorn
+pillow
+pyyaml
+python-multipart

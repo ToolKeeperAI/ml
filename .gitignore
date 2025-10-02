@@ -1,0 +1,6 @@
+__pycache__
+*.pyc
+data/
+venv/
+fasterrcnn_tools.pth
+*.DS_Store
