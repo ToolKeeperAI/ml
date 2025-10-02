@@ -2,5 +2,5 @@ __pycache__
 *.pyc
 data/
 venv/
-fasterrcnn_tools.pth
+*.pth
 *.DS_Store

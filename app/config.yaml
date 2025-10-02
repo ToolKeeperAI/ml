@@ -4,6 +4,6 @@ api:
 
 
 model:
-  weights: "app/models/fasterrcnn_tools.pth"
+  weights: "app/models/fasterrcnn.pth"
   device: "cpu"
   batch_size: 4
